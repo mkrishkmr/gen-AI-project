@@ -42,15 +42,18 @@ Simply tell the app your preferred cuisine, location, and budget. The system:
 ## 🏗️ Project Structure
 
 ```
-gen-AI-project/
+ai-restaurant-recommender/
 │
-├── src/                          # Core application source
-│   ├── data/
-│   │   └── loader.py             # Hugging Face dataset loader & cleaner
-│   ├── engine/
-│   │   └── search.py             # Restaurant filtering & ranking logic
-│   ├── llm/
-│   │   └── groq_client.py        # Groq API client (LLaMA 3.3 70B)
+├── Phase_1_Data/                 # Phase 1: Data Preparation
+│   └── data/
+│       └── loader.py             # Hugging Face dataset loader & cleaner
+├── Phase_2_Search/               # Phase 2: Core Search Engine
+│   └── engine/
+│       └── search.py             # Restaurant filtering & ranking logic
+├── Phase_3_LLM/                  # Phase 3: AI Insights Generation
+│   └── llm/
+│       └── groq_client.py        # Groq API client (LLaMA 3.3 70B)
+├── Phase_4_App/                  # Phase 4: Full App API & UI
 │   ├── api/
 │   │   └── main.py               # FastAPI REST endpoint
 │   └── ui/
@@ -81,8 +84,8 @@ gen-AI-project/
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/mkrishkmr/gen-AI-project.git
-cd gen-AI-project
+git clone https://github.com/mkrishkmr/ai-restaurant-recommender.git
+cd ai-restaurant-recommender
 ```
 
 ### 2. Set up environment
@@ -106,7 +109,7 @@ HF_DATASET=ManikaSaini/zomato-restaurant-recommendation
 
 ### 4. Run the app
 ```bash
-python -m streamlit run src/ui/app.py
+python -m streamlit run Phase_4_App/ui/app.py
 ```
 The app will be available at **http://localhost:8501**
 

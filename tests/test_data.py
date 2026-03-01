@@ -5,7 +5,7 @@ Tests for the Data Layer - data loading and cleaning.
 import pytest
 import pandas as pd
 
-from src.data.loader import load_and_clean_dataset, _clean_rate, _clean_approx_cost
+from Phase_1_Data.data.loader import load_and_clean_dataset, _clean_rate, _clean_approx_cost
 
 
 class TestCleanHelpers:

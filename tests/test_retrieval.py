@@ -5,7 +5,7 @@ Tests for the Retrieval Engine - search and filtering.
 import pytest
 import pandas as pd
 
-from src.engine.search import get_candidates
+from Phase_2_Search.engine.search import get_candidates
 
 
 def _mock_dataframe() -> pd.DataFrame:
@@ -71,7 +71,8 @@ class TestGetCandidates:
             min_rating=0.0,
             top_k=5,
         )
-        assert all(r["approx_cost"] <= 700 for _, r in result.iterrows())
+        # Accounts for relaxed price search (up to 1.5x budget) when < 3 results
+        assert all(r["approx_cost"] <= 700 * 1.5 for _, r in result.iterrows())
 
     def test_filters_by_min_rating(self):
         df = _mock_dataframe()

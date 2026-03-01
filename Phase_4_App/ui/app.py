@@ -20,9 +20,9 @@ except ImportError:
 import streamlit as st
 
 # Load data and logic directly (no API required for standalone mode)
-from src.data.loader import load_and_clean_dataset
-from src.engine.search import get_candidates
-from src.llm.groq_client import format_recommendation
+from Phase_1_Data.data.loader import load_and_clean_dataset
+from Phase_2_Search.engine.search import get_candidates
+from Phase_3_LLM.llm.groq_client import format_recommendation
 
 # Zomato brand colors
 PRIMARY = "#E23744"

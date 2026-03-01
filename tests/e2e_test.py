@@ -12,9 +12,9 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from src.data.loader import load_and_clean_dataset
-from src.engine.search import get_candidates
-from src.llm.groq_client import format_recommendation, _parse_json_response
+from Phase_1_Data.data.loader import load_and_clean_dataset
+from Phase_2_Search.engine.search import get_candidates
+from Phase_3_LLM.llm.groq_client import format_recommendation, _parse_json_response
 
 # Expected keys in each recommendation
 REQUIRED_KEYS = ["name", "why_it_fits", "suggested_dishes", "vibe"]
@@ -45,7 +45,7 @@ class TestE2E:
             assert all("Italian" in str(c) for c in candidates["cuisines"])
             assert all(c <= 1000 for c in candidates["approx_cost"])
 
-    @patch("src.llm.groq_client.Groq")
+    @patch("Phase_3_LLM.llm.groq_client.Groq")
     def test_mock_groq_returns_valid_recommendation_structure(self, mock_groq_class):
         """Step 3 & 4: Mock Groq, verify recommendation object has correct keys."""
         mock_response = MagicMock()

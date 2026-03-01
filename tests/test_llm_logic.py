@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from src.llm.groq_client import (
+from Phase_3_LLM.llm.groq_client import (
     _build_candidate_text,
     _parse_json_response,
     format_recommendation,
@@ -67,7 +67,7 @@ class TestBuildCandidateText:
 class TestFormatRecommendationWithMock:
     """Test format_recommendation with mocked Groq API."""
 
-    @patch("src.llm.groq_client.Groq")
+    @patch("Phase_3_LLM.llm.groq_client.Groq")
     def test_returns_parsed_json_from_mock_response(self, mock_groq_class):
         mock_response = MagicMock()
         mock_response.choices = [
@@ -120,7 +120,7 @@ class TestFormatRecommendationWithMock:
         assert rec["suggested_dishes"] == ["Biryani", "Butter Chicken"]
         assert rec["vibe"] == "Cozy and family-friendly"
 
-    @patch("src.llm.groq_client.Groq")
+    @patch("Phase_3_LLM.llm.groq_client.Groq")
     def test_passes_candidates_to_prompt(self, mock_groq_class):
         mock_response = MagicMock()
         mock_response.choices = [

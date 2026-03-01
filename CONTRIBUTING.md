@@ -8,8 +8,8 @@ Thank you for your interest in contributing! This guide will get you set up quic
 
 ### 1. Fork and clone
 ```bash
-git clone https://github.com/<your-username>/gen-AI-project.git
-cd gen-AI-project
+git clone https://github.com/<your-username>/ai-restaurant-recommender.git
+cd ai-restaurant-recommender
 ```
 
 ### 2. Set up environment
@@ -62,11 +62,11 @@ feature branch → local tests → PR to main
 
 | Folder | Add code here when... |
 |---|---|
-| `src/data/` | Changing how the dataset is loaded or cleaned |
-| `src/engine/` | Modifying search/filter/ranking logic |
-| `src/llm/` | Changing prompt design or LLM provider |
-| `src/api/` | Adding or modifying REST endpoints |
-| `src/ui/` | Changing the Streamlit UI |
+| `Phase_1_Data/` | Changing how the dataset is loaded or cleaned |
+| `Phase_2_Search/` | Modifying search/filter/ranking logic |
+| `Phase_3_LLM/` | Changing prompt design or LLM provider |
+| `Phase_4_App/api/` | Adding or modifying REST endpoints |
+| `Phase_4_App/ui/` | Changing the Streamlit UI |
 | `tests/` | Adding test coverage for any of the above |
 
 ---
@@ -97,4 +97,4 @@ Please open a GitHub Issue with:
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/mkrishkmr/gen-AI-project/discussions) for questions, ideas, or feature requests.
+Open a [GitHub Discussion](https://github.com/mkrishkmr/ai-restaurant-recommender/discussions) for questions, ideas, or feature requests.

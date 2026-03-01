@@ -8,8 +8,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 load_dotenv()
 
-from src.data.loader import load_and_clean_dataset
-from src.engine.search import get_candidates
+from Phase_1_Data.data.loader import load_and_clean_dataset
+from Phase_2_Search.engine.search import get_candidates
 
 def test_loader():
     print("Testing DataLoader...")

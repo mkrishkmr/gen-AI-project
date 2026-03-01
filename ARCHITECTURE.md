@@ -1,130 +1,53 @@
-# System Architecture — AI Restaurant Recommendations
+# Architecture Vision — AI Restaurant Recommendations
 
-A 4-layer system: **Data → Engine → LLM → UI**, with an optional REST API for headless access.
+*Empowering users to find the perfect meal through hyper-personalized, AI-driven discovery.*
 
 ---
 
-## User Journey
+## 🚀 The Product Strategy
+We are moving beyond standard keyword filters ("Italian, 4 stars"). Our goal is to connect users with the right restaurant by combining lightning-fast data retrieval with generative AI that explains *why* a place fits their exact mood and budget.
+
+To execute this, we have deliberately designed the application in four decoupled phases. This modularity ensures our engineering teams can iterate, scale, and test independently.
+
+---
+
+## 🧩 Core Platform Architecture
+
+Our architecture follows a clean, 4-phase pipeline (Data → Search → GenAI → Application) designed for reliability and speed.
+
+### Phase 1: Data Preparation (`Phase_1_Data/`)
+**Goal:** Ingest and normalize raw restaurant supply.
+- We pull a 50k+ restaurant catalog from the Zomato Hugging Face dataset.
+- The loader cleans pricing, ratings, and missing cuisines at startup, caching the results to avoid upstream latency.
+
+### Phase 2: Core Search Engine (`Phase_2_Search/`)
+**Goal:** Millisecond-level candidate retrieval.
+- When a user searches, we don't send 50k properties to the LLM. Instead, our local search engine instantly filters for exact criteria (location, cuisine, budget, rating).
+- **Graceful Degradation:** If we find fewer than 3 matches, the engine automatically broadens the search (e.g., wider city area or 1.5x budget threshold) to ensure the user always gets high-quality recommendations, never a dead end.
+
+### Phase 3: AI Insights Generation (`Phase_3_LLM/`)
+**Goal:** Deliver personalized, human-like reasoning.
+- The highly-ranked shortlist from Phase 2 is passed to our Generative AI layer.
+- We leverage **Groq's LLaMA 3.3 70B** via a fast, structured API.
+- The LLM reasons over the candidates and returns a structured JSON payload detailing *exactly why* the restaurant fits the user's specific request, along with curated dish suggestions and vibe checks.
+
+### Phase 4: Full App API & UI (`Phase_4_App/`)
+**Goal:** Delight the user.
+- **Backend (`api/`):** A stateless FastAPI REST endpoint that exposes the entire pipeline for mobile or headless B2B integrations.
+- **Frontend (`ui/`):** A fast, Zomato-inspired Streamlit web app interface designed for zero-friction discovery.
+
+---
+
+## 🔄 User Data Flow
 
 ```mermaid
 flowchart LR
-    A[👤 User Input] --> B[🔍 Smart Filter]
-    B --> C[🤖 Groq LLaMA 3.3]
-    C --> D[📇 Zomato Card View]
+    A[👤 User Intent] --> B[🔍 Phase 2: Local Search]
+    B --> C[🤖 Phase 3: Groq LLaMA 3.3]
+    C --> D[📱 Phase 4: Curated UI Cards]
 
-    subgraph "User Layer"
-        A
-        D
-    end
-
-    subgraph "Application Layer"
-        B
-        C
-    end
+    style A fill:#E23744,stroke:#333,stroke-width:2px,color:#fff
+    style D fill:#E23744,stroke:#333,stroke-width:2px,color:#fff
 ```
 
-1. **User selects** cuisine, location, budget, and minimum rating.
-2. **Smart Filter** narrows 51,000+ restaurants to a ranked shortlist.
-3. **Groq LLaMA 3.3 70B** generates personalized AI insights per candidate.
-4. **Card View** renders results with ratings, dishes, and vibe descriptions.
-
----
-
-## Data Flow
-
-```mermaid
-flowchart TB
-    subgraph "Hugging Face"
-        HF[(Zomato Dataset\n51,717 restaurants)]
-    end
-
-    subgraph "src/data"
-        LOADER[loader.py\nClean & normalize]
-    end
-
-    subgraph "src/engine"
-        SEARCH[search.py\nFilter + rank\nRelaxed fallback]
-    end
-
-    subgraph "src/llm"
-        GROQ[groq_client.py\nLLaMA 3.3 70B\nJSON output]
-    end
-
-    subgraph "Presentation"
-        UI[src/ui/app.py\nStreamlit]
-        API[src/api/main.py\nFastAPI]
-    end
-
-    HF --> LOADER --> SEARCH --> GROQ --> UI
-    GROQ --> API
-```
-
----
-
-## Component Reference
-
-| Component | File | Responsibility |
-|---|---|---|
-| **Data Loader** | `src/data/loader.py` | Load HF dataset into DataFrame. Clean `rate` (strip `/5`), `approx_cost` (remove commas), fill missing cuisines |
-| **Search Engine** | `src/engine/search.py` | Filter by location, cuisine, budget, rating. Relaxed fallback: broaden to city-wide or ±50% budget if <3 results. Rank by `rating × log(1 + votes)` |
-| **LLM Client** | `src/llm/groq_client.py` | Build prompt, call Groq API (`llama-3.3-70b-versatile`, `temp=0.3`), parse structured JSON response |
-| **REST API** | `src/api/main.py` | FastAPI `/recommend` endpoint. Exposes the full pipeline as a stateless REST service |
-| **UI** | `src/ui/app.py` | Streamlit app. `st.selectbox` for Location, `st.multiselect` for Cuisine. Renders AI Insight cards with `#E23744` accents |
-
----
-
-## Search Relaxation Strategy
-
-If strict filtering returns fewer than 3 restaurants, the engine runs two parallel relaxations and merges:
-
-```
-Strict match       → location exact + cuisine + budget + rating
-Relaxed (city)     → broaden to full city (vs neighborhood)
-Relaxed (budget)   → allow up to 1.5× user budget
-Final set          → union of relaxed sets, deduplicated, ranked
-```
-
----
-
-## LLM Prompt Design
-
-- **System role:** "Respond ONLY with valid JSON using the recommendation schema."
-- **User prompt:** Structured block of user preferences + candidate restaurant list.
-- **Output schema:**
-```json
-{
-  "recommendations": [
-    {
-      "name": "Restaurant Name",
-      "why_it_fits": "Personalized reason for this user",
-      "suggested_dishes": ["Dish A", "Dish B"],
-      "vibe": "Casual, rooftop, great for dates"
-    }
-  ]
-}
-```
-- **Model:** `llama-3.3-70b-versatile` | **Temperature:** `0.3` | **Format:** `json_object`
-
----
-
-## Caching & Performance
-
-| Mechanism | Where | Effect |
-|---|---|---|
-| `@st.cache_data` | `src/ui/app.py` | Dataset loaded once per session; no repeat HF calls |
-| Local HF cache | `./hf_cache/` | Dataset cached to disk; avoids download on restart |
-| LLM lazy client | `src/llm/groq_client.py` | Groq client created per-call; stateless and thread-safe |
-
----
-
-## Deployment
-
-### Local (Streamlit)
-```bash
-python -m streamlit run src/ui/app.py
-```
-
-### Local (FastAPI)
-```bash
-uvicorn src.api.main:app --reload --port 8000
-```
+By keeping our architecture in these distinct, well-defined phases, we've positioned ourselves to swap out underlying technologies (like vector databases or new LLM models) without disrupting the core user experience.

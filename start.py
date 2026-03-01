@@ -31,7 +31,7 @@ def main():
     # Step 3: Launch UI
     print("\n[OK] All tests passed. Launching UI...\n")
     run(
-        [sys.executable, "-m", "streamlit", "run", "src/ui/app.py", "--server.headless", "true"],
+        [sys.executable, "-m", "streamlit", "run", "Phase_4_App/ui/app.py", "--server.headless", "true"],
         "Starting Streamlit UI",
     )
 
